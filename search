@@ -1,0 +1,308 @@
+this is my game coded in C using minilibx, the player  (representing by the image 'andrew180.xpm')can only move on the half left side of the window, but can not access to half right side of the window. this is my code into 6 files : 
+colors.c :
+#include "mlx_sample.h"
+
+/* Return a new color, each value can go from 0 to 255.
+* With alpha at 0 the image is opaque, and with it at 255 is completely transparent. */
+t_color	new_color(int r, int g, int b, int a)
+{
+	t_color	color;
+
+	color.r = (char)r;
+	color.g = (char)g;
+	color.b = (char)b;
+	color.a = (char)a;
+	return (color);
+}
+
+/* Turns the four first chars of <pixel> to be representing <color> */
+void	turn_pixel_to_color(char *pixel, t_color color)
+{
+	/* pixels are define as follows:
+	* the first char is blue, the second green, then red
+	* and finally the alpha or transparency.
+	* This order depends on the system, and it is defined by the endian. */
+	pixel[0] = color.b;
+	pixel[1] = color.g;
+	pixel[2] = color.r;
+	pixel[3] = color.a;
+}
+
+/* turns all pixels of <image> to <color> */
+void	turn_img_to_color(t_image *image, t_color color)
+{
+	int	x;
+	int	y;
+
+	/* Loops that repeat for each pixel of the image as it was a 2D table */
+	y =  0;
+	while (y < image->size.y)
+	{
+		x = 0;
+		while(x < image->size.x)
+		{
+			/* 	We apply the formula to get the pixel
+			*	in that x,y position of the pixels char array */
+			turn_pixel_to_color(
+				&image->pixels[x * 4 + image->line_size * y],
+				color);
+			x++;
+		}
+		y++;
+	}
+}
+
+hooks.c :
+#include "mlx_sample.h"
+#include <stdio.h>
+#include <tgmath.h>
+
+/* Any functon that you hook with the key event must be like this:
+* Recibing and int for the code of the key pressed
+* and a void pointer in case you need to recibe someting */
+int	ft_input(int key, void *param)
+{
+	t_program *program = (t_program *)param;
+
+	// mlx function that clears the window
+	mlx_clear_window(program->mlx, program->window.reference);
+
+	// move in a direction based on the key
+	if (key == 124)
+		program->sprite_position.x += program->sprite.size.x;
+	else if (key == 123)
+		program->sprite_position.x -= program->sprite.size.x;
+	else if (key == 125)
+		program->sprite_position.y += program->sprite.size.y;
+	else if (key == 126)
+		program->sprite_position.y -= program->sprite.size.y;
+	// change color based on keys R, G and B.
+	else if (key == 15)
+		turn_img_to_color(&program->sprite, new_color(255,0,0,0));
+	else if (key == 5)
+		turn_img_to_color(&program->sprite, new_color(0,255,0,0));
+	else if (key == 11)
+		turn_img_to_color(&program->sprite, new_color(0,0,255,0));
+	t_image block = ft_new_sprite(program->mlx, "block.xpm");
+	mlx_put_image_to_window(program->mlx, program->window.reference, block.reference, 0, 500);
+	mlx_put_image_to_window(program->mlx, program->window.reference, block.reference, 0, 450);
+	mlx_put_image_to_window(program->mlx, program->window.reference, block.reference, 0, 400);
+	mlx_put_image_to_window(program->mlx, program->window.reference, block.reference, 0, 350);
+	mlx_put_image_to_window(program->mlx, program->window.reference, block.reference, 0, 300);
+	// mlx function that puts and image into a window at a given position
+	// (the position 0,0 is the upper-left corner)
+	mlx_put_image_to_window(program->mlx, program->window.reference,
+			program->sprite.reference, program->sprite_position.x, program->sprite_position.y);
+
+	// print the key pressed so you know the number of each key
+	printf("Key pressed -> %d\n", key);
+	return (0);
+}
+
+int	ft_update (void *param)
+{
+    t_program		*program = (t_program *)param;
+	t_program_block	*program_block = (t_program_block *)param;
+    // a static that saves how many frames have passed
+    static int	frame;
+
+    // add a frame and every x frames change the position by 1 pixel
+    // so it looks like its animated
+    frame++;
+    if (frame == ANIMATION_FRAMES)
+        program->sprite_position.y += 1;
+    // every x*2 frames go back that pixel to loop the animation
+    else if (frame >= ANIMATION_FRAMES * 2)
+    {
+        program->sprite_position.y -= 1;
+        frame = 0;
+    }
+
+    // Clear the window
+    mlx_clear_window(program->mlx, program->window.reference);
+
+    // Clamp the sprite position to the window bounds
+    program->sprite_position.x = fmax(0, fmin(program->sprite_position.x, WINDOW_WIDTH - program->sprite.size.x));
+    program->sprite_position.y = fmax(0, fmin(program->sprite_position.y, WINDOW_HEIGHT - program->sprite.size.y));
+
+    // Draw the sprite at the clamped position
+    mlx_put_image_to_window(program->mlx, program->window.reference, program->sprite.reference, program->sprite_position.x, program->sprite_position.y);
+
+	mlx_put_image_to_window(program_block->mlx, program_block->window.reference, program_block->stationary_sprite.reference, program_block->stationary_sprite_position.x, program_block->stationary_sprite_position.y);
+    return (0);
+}
+
+image.c : 
+#include "mlx_sample.h"
+
+/* Returns an image of <width> x <height> black pixels. */
+t_image ft_new_image(void* mlx, int width, int height)
+{
+	t_image img;
+
+	/* mlx function that creates and returns a pointer
+	to an image of the given width and height */
+	img.reference = mlx_new_image(mlx, width, height);
+	img.size.x = width;
+	img.size.x = height;
+
+	/* mlx function that returs a pointer to the first pixel of the given image.
+	* ¡Pixels are not stored in a 2D table, just a single char[] array!
+	* the fuction also saves in the given pointers:
+	*	the bits per pixel (each pixel is usually 4 chars of the array),
+	* 	the line size of the pixels array  (the amount of pixels in one line of the image)
+	* 	and the endian (info of how the colors are stored) */
+	img.pixels = mlx_get_data_addr(img.reference, &img.bits_per_pixel, &img.line_size, &img.endian);
+
+	return (img);
+}
+
+/* Returns an image with the sprite found in <path> */
+t_image ft_new_sprite(void *mlx, char *path)
+{
+	t_image img;
+
+	/* mlx function that creates and image that contains the xmp file found in the given path.
+	* It also saves the width and height of the image in the pointers passed as parameters */
+	img.reference = mlx_xpm_file_to_image(mlx, path, &img.size.x, &img.size.y);
+	img.pixels  = mlx_get_data_addr(img.reference, &img.bits_per_pixel, &img.line_size, &img.endian);
+	return (img);
+}
+
+main.c : 
+#include "mlx_sample.h"
+
+int main()
+{
+	// ----------
+	// Struct with all the info that I need to run the program (mlx_sample.h)
+	t_program program;
+//	t_program_block program_block;
+	// mlx function that initialize the mlx and returns a pointer to it.
+	program.mlx = mlx_init();
+	// Open a window (window.c whitin this project)
+	program.window = ft_new_window(program.mlx, WINDOW_HEIGHT, WINDOW_WIDTH, "SO_LONG by vakandi");
+
+	// ----------
+
+	// Create a new image/sprite (image.c)
+	program.sprite = ft_new_sprite(program.mlx, "andrew180.xpm");
+	program.sprite_position.x = 0;
+	program.sprite_position.y = 0;
+
+//	t_image block = ft_new_sprite(program.mlx, "block.xpm");
+//	mlx_put_image_to_window(program.mlx, program.window.reference, block.reference, 100, 500);
+	// hook the input() (hooks.c) function to the the key pressed event
+	mlx_key_hook(program.window.reference, *ft_input, &program);
+	// hook a function to the loop (it would be called each frame)
+	mlx_loop_hook(program.mlx, *ft_update, &program);
+
+	// ----------
+
+	// mlx constant loop that keeps the detects the events
+	mlx_loop(program.mlx);
+}
+
+mlx_sample.h :
+#ifndef SAMPLE_LIB_H
+# define SAMPLE_LIB_H
+
+# include <mlx.h>
+
+// ----------------------------------
+// MACROS
+
+# ifndef ANIMATION_FRAMES
+#  define ANIMATION_FRAMES 10
+#  define WINDOW_WIDTH 1080
+#  define WINDOW_HEIGHT 1980
+# endif
+
+// ----------------------------------
+// STRUCTS
+
+/* vector with an x and y */
+typedef struct	s_vector
+{
+	int	x;
+	int	y;
+}				t_vector;
+
+/* A pointer to the window and its size */
+typedef struct	s_window {
+	void		*reference;
+	t_vector	size;
+}				t_window;
+
+/* The 4 values that define a color */
+typedef struct s_color {
+	int	r;
+	int g;
+	int b;
+	int a;
+}	t_color;
+
+/* all info needed for an image */
+typedef struct	s_image {
+	void		*reference;
+	t_vector	size;
+	char		*pixels;
+	int			bits_per_pixel;
+	int			line_size;
+	int			endian;
+}				t_image;
+
+typedef struct	s_program {
+	void		*mlx;
+	t_window	window;
+	t_image		sprite;
+	t_vector	sprite_position;
+}				t_program;
+
+typedef struct	block_program {
+	void		*mlx;
+	t_window	window;
+	t_image		stationary_sprite;
+	t_vector	stationary_sprite_position;
+}				t_program_block;
+
+
+
+// ---------------------------------
+// FUNCTIONS
+
+t_window	ft_new_window(void *mlx, int widht, int height, char *name);
+t_image		ft_new_sprite(void *mlx, char *path);
+
+t_color		new_color(int r, int g, int b, int a);
+void		turn_img_to_color(t_image *image, t_color color);
+
+int			ft_input(int key, void *program);
+int			ft_update (void *param);
+
+#endif
+
+window.c : 
+#include "mlx_sample.h"
+#include <stdlib.h>
+
+int ft_close ()
+{
+	exit(0);
+}
+
+t_window	ft_new_window(void *mlx, int widht, int height, char *name)
+{
+	t_window	window;
+
+	/* This mlx function creates a returns a pointer
+	to a new window with a given size and name */
+	window.reference = mlx_new_window(mlx, widht, height, name);
+	window.size.x = widht;
+	window.size.y = height;
+
+	// Now we 'hook' the function ft_close() to the closing window event
+	mlx_hook(window.reference, 17, 0, ft_close, 0);
+
+	return (window);
+}

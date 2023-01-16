@@ -7,32 +7,49 @@
 * and a void pointer in case you need to recibe someting */
 int	ft_input(int key, void *param)
 {
-    t_program *program = (t_program *)param;
+	t_program *program = (t_program *)param;
 
-    // mlx function that clears the window
-    mlx_clear_window(program->mlx, program->window.reference);
+	// mlx function that clears the window
+	mlx_clear_window(program->mlx, program->window.reference);
 
-    // move in a direction based on the key
-    if (key == 124 && program->sprite_position.x + program->sprite.size.x < program->window.size.x)
-        program->sprite_position.x += program->sprite.size.x;
-    else if (key == 123 && program->sprite_position.x - program->sprite.size.x > 0)
-        program->sprite_position.x -= program->sprite.size.x;
-    else if (key == 125)
-        program->sprite_position.y += program->sprite.size.y;
-    else if (key == 126)
-        program->sprite_position.y -= program->sprite.size.y;
-    // change color based on keys R, G and B.
-    else if (key == 15)
-        turn_img_to_color(&program->sprite, new_color(255,0,0,0));
-    else if (key == 5)
-        turn_img_to_color(&program->sprite, new_color(0,255,0,0));
-    else if (key == 11)
-        turn_img_to_color(&program->sprite, new_color(0,0,255,0));
-    //t_image block = ft_new_sprite(program->mlx, "block.xpm");
-    //mlx_put_image_to_window(program->mlx, program->window.reference, block.reference, 0, 400);
-	//
-    mlx_put_image_to_window(program->mlx, program->window.reference, program->sprite.reference, program->sprite_position.x, program->sprite_position.y);
-    return (0);
+	// move in a direction based on the key
+	if (key == 124)
+		if (program->sprite_position.x + program->sprite.size.x < program->window.size.x)
+			program->sprite_position.x += program->sprite.size.x;
+		else if (program->sprite_position.x - program->sprite.size.x > 0)
+			program->sprite_position.x -= program->sprite.size.x;
+		//program->sprite_position.x += program->sprite.size.x;
+	else if (key == 123)
+		if (program->sprite_position.x + program->sprite.size.x < program->window.size.x)
+			program->sprite_position.x += program->sprite.size.x;
+		else if (program->sprite_position.x - program->sprite.size.x > 0)
+			program->sprite_position.x -= program->sprite.size.x;
+		//program->sprite_position.x -= program->sprite.size.x;
+	else if (key == 125)
+		program->sprite_position.y += program->sprite.size.y;
+	else if (key == 126)
+		program->sprite_position.y -= program->sprite.size.y;
+	// change color based on keys R, G and B.
+	else if (key == 15)
+		turn_img_to_color(&program->sprite, new_color(255,0,0,0));
+	else if (key == 5)
+		turn_img_to_color(&program->sprite, new_color(0,255,0,0));
+	else if (key == 11)
+		turn_img_to_color(&program->sprite, new_color(0,0,255,0));
+	t_image block = ft_new_sprite(program->mlx, "block.xpm");
+	mlx_put_image_to_window(program->mlx, program->window.reference, block.reference, 0, 500);
+	mlx_put_image_to_window(program->mlx, program->window.reference, block.reference, 0, 450);
+	mlx_put_image_to_window(program->mlx, program->window.reference, block.reference, 0, 400);
+	mlx_put_image_to_window(program->mlx, program->window.reference, block.reference, 0, 350);
+	mlx_put_image_to_window(program->mlx, program->window.reference, block.reference, 0, 300);
+	// mlx function that puts and image into a window at a given position
+	// (the position 0,0 is the upper-left corner)
+	mlx_put_image_to_window(program->mlx, program->window.reference,
+			program->sprite.reference, program->sprite_position.x, program->sprite_position.y);
+	
+	// print the key pressed so you know the number of each key
+	printf("Key pressed -> %d\n", key);
+	return (0);
 }
 
 int	ft_update (void *param)

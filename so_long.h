@@ -6,7 +6,7 @@
 /*   By: jfritz <jfritz@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/07/19 09:37:13 by jfritz            #+#    #+#             */
-/*   Updated: 2021/07/28 10:33:43 by jfritz           ###   ########.fr       */
+/*   Updated: 2023/01/19 01:34:44 by wbousfir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 # define WALL "./assets/baum1.xpm"
 # define WALL2 "./assets/baum2.xpm"
 # define WALL3 "./assets/baum3.xpm"
-# define STAR "./assets/flower_light.xpm"
+# define STAR "./assets/dollars.xpm"
 # define STONE "./assets/floor1.xpm"
 # define EXIT "./assets/exit80.xpm"
 

@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   error.c                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: rarollan <marvin@42.fr>                    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/08/30 16:42:54 by rarollan          #+#    #+#             */
-/*   Updated: 2022/08/30 16:42:56 by rarollan         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "so_long.h"
 
 int	error_char(t_map *map)
@@ -38,17 +26,17 @@ int	error_input(t_map *map)
 {
 	if (map->nb_c == 0)
 	{
-		printf("Error\nMap must have at least one collectible");
+		printf("Error Map must have at least one collectible");
 		return (0);
 	}
 	else if (map->nb_e == 0)
 	{
-		printf("Error\nMap must have at least one exit\n");
+		printf("Error Map must have at least one exit");
 		return (0);
 	}
 	else if (map->nb_p != 1)
 	{
-		printf("Error\nMap must have one starting position\n");
+		printf("Error Map must have one starting position");
 		return (0);
 	}
 	return (1);
@@ -63,7 +51,7 @@ int	error_form(t_map *map, int len)
 	{
 		if (len != ft_strlen(map->map_tab[i]) - 1)
 		{
-			printf("Error\nMap must be a rectangle");
+			printf("ErrorMap must be a rectangle");
 			return (0);
 		}
 		i++;
@@ -106,7 +94,7 @@ int	ft_error(t_map *map)
 	len = ft_strlen_so_long(map->map_tab[0]) - 1;
 	if (!error_char(map))
 	{
-		printf("Error\nInvalid character on map\n");
+		printf("Error Invalid character on map");
 		return (0);
 	}
 	if (!error_form(map, len)
@@ -114,7 +102,7 @@ int	ft_error(t_map *map)
 		return (0);
 	else if (!error_wall(map, len))
 	{
-		printf("Error\nMap not closed\n");
+		printf("Error Map not closed");
 		return (0);
 	}
 	return (1);

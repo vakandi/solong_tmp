@@ -1,65 +1,25 @@
-NAME			=	so_long
+all: 
+	@echo "\033[1;35m\n\n - STARTING COMPILATION -\n\n\033[0m"
+	@clang -Wall -Werror -Wextra -g -I includes -I libft -I mlx -c srcs/*.c
+	@make -C libft
+	@make -C mlx
+	@clang -Wall -Werror -Wextra -g -L libft -L mlx *.o -o so_long -lft -lm -lmlx -lXext -lX11
+	@if [ -f so_long ]; then echo "\033[1;32m\n\n - COMPILATION FINISHED -\n\n\033[0m"; echo "\033[1;34m\n\n  Name of the executable: \n\033[1;34m        so_long\n\n\033[0m"; else echo "\033[1;31m\n\n - COMPILATION FAILED -\n\n\033[0m"; fi
+	@rm -rf *.o
+	
+check: all
+	@echo "\033[1;35m\n\n - STARTING LEAKS CHECK.. -\n\n\033[0m"
+	@valgrind --leak-check=full --tool=memcheck --show-reachable=yes --track-fds=yes --errors-for-leak-kinds=all --show-leak-kinds=all ./so_long
+	@echo "\033[1;32m\n\n - CHECKING FINISHED -\n\n\033[0m"
 
-SRCS			=	main.c \
-					error.c \
-					init_game.c \
-					move.c \
-					parsing.c \
-					set_textures.c \
-					utils.c \
+clean:
+	@rm -rf *.o
+	@make clean -C libft
+	@make clean -C mlx
+	@rm -rf srcs/*.o
 
-OBJS			=	${addprefix srcs/,${SRCS:.c=.o}}
+fclean: clean
+	@rm -rf so_long
+	@make fclean -C libft
 
-LD_FLAGS		=	-L libft -L mlx
-
-MLX_FLAGS		=	-lm -lmlx -lXext -lX11
-
-HEAD			=	-I includes -I libft -I mlx
-
-CC				=	clang
-
-CFLAGS			=	-Wall -Werror -Wextra -g #-fsanitize=address
-
-.c.o			:
-					${CC} ${CFLAGS} ${HEAD} -c $< -o ${<:.c=.o}
-					printf "$(GREEN)█"
-
-$(NAME)			:	compile ${OBJS} done
-					make -C libft
-					make -C mlx
-					${CC} ${CFLAGS} ${LD_FLAGS} ${OBJS} -o ${NAME} -lft ${MLX_FLAGS}
-
-all				:	${NAME}
-
-val				:	${NAME}
-					valgrind \
-					--leak-check=full --tool=memcheck \
-					--show-reachable=yes \
-					--track-fds=yes \
-					--errors-for-leak-kinds=all \
-					--show-leak-kinds=all ./${NAME}
-					
-clean			:
-					make clean -C libft
-					make clean -C mlx
-					@rm -rf ${OBJS}
-
-fclean			:	clean
-					make fclean -C libft
-					@rm -rf ${NAME}
-
-re				:	fclean all
-
-.PHONY			:	all clean fclean re
-
-.SILENT:
-
-BLUE	= \033[1;34m
-GREEN	= \033[1;32m
-YELLOW	= \033[1;33m
-DEFAULT = \033[0m
-
-compile	:
-			echo "\n$(YELLOW)[X] Compiling $(BLUE)So_long$(DEFAULT)\n"
-done	:
-			echo "$(GREEN) => 100%$(DEFAULT)\n"
+re: fclean all
